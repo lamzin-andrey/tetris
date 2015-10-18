@@ -1,0 +1,43 @@
+<html>
+	<head>
+		<style>
+			body {margin:0; padding:0; background:black;}
+		</style>
+		<script type="text/javascript">
+			function A() {
+				this.x = 1;
+			}
+			A.prototype.f1 = function() {
+				console.log(this);
+			}
+			function B() {
+				this.x = 65;
+			}
+			B.prototype.f2 = function() {
+				var a = new A();
+				a.f1();
+				a.f1.apply(this);
+			}
+			
+			var a = new A();
+			var b = new A ();
+			var listO = {obj1: a, obj2: b};
+			var listA = [a, b];
+			console.log( listO.obj1 === listA[0] );
+			delete listO.obj1;			
+			//listA.splice(0, 1);
+			
+			console.log(listO);
+			console.log(listA);
+		</script>
+	</head>
+	<body>
+		<div id="trace"></div>
+		<!--div style="width:100%;border:1px solid black"><div style="width:800px;margin:0px auto;"-->
+			<table width="100%"><tr><td align="center">
+			<canvas  id="mycan" width="240" height="320"></canvas>
+			<!--/td></tr></table-->
+		</div>
+		<div id="panel"></div>
+	</body>
+</html>

@@ -1,0 +1,29 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<style>
+			body {margin:0; padding:0; background:black;}
+		</style>
+		<script type="text/javascript">
+			window.onload = function() {
+				new SimpleEngine2D("mycan", 44);
+				new Tetris();
+			}
+		</script>
+		<script src="data/js/se2d/se2d.js"></script>
+		<script src="data/js/se2d/dom.js"></script>
+		<script src="data/js/tetrisfigure.js"></script>
+		<script src="data/js/tetrissquare.js"></script>
+		<script src="data/js/tetris.js"></script>
+		<script src="data/js/unittest.js"></script>
+	</head>
+	<body>
+		<div id="trace"></div>
+		<!--div style="width:100%;border:1px solid black"><div style="width:800px;margin:0px auto;"-->
+			<table width="100%"><tr><td align="center">
+			<canvas  id="mycan" width="240" height="320"></canvas>
+			<!--/td></tr></table-->
+		</div>
+		<div id="panel"></div>
+	</body>
+</html>
