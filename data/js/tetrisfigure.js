@@ -61,6 +61,7 @@ TetrisFigure.prototype.addFigure = function() {
  * @return {Bool}   true если пространство свободно
 */
 TetrisFigure.prototype.checkSpaceUtil = function(info, max, secondRowI, thirdRowI, fourthRowI, fifthRowI) {
+	secondRowI  = secondRowI ? secondRowI : 9;
 	thirdRowI  = thirdRowI ? thirdRowI : 9;
 	fourthRowI = fourthRowI ? fourthRowI : 9;
 	fifthRowI  = fifthRowI ? fifthRowI : 9;
@@ -68,7 +69,8 @@ TetrisFigure.prototype.checkSpaceUtil = function(info, max, secondRowI, thirdRow
 	for (i = 0; i < this.countBlock; i++) {
 		J = this.cellJ + this.blocks[i].offsetX;
 		I = this.cellI + this.blocks[i].offsetY;
-		if (this.t.workGrid[I][J] == 1) {
+		//console.log( this.t.workGrid[I][J] );
+		if (this.t.workGrid[I][J] == 1 || String(this.t.workGrid[I][J])  == 'undefined') {
 			result = false;
 			if (i > fifthRowI) { 
 				v = 5;

@@ -34,7 +34,7 @@ Tetris.prototype.onInit = function() {
 		this.app.fon.visible = 1;
 		this.app.addConrtolsArea();
 		this.app.loadMap();
-		var t = new TetrisSquare(this.app, 2);
+		var t = new TetrisLine(this.app);
 		return;
 		if (window.runUnittest && runUnittest instanceof Function) {
 			runUnittest();
@@ -71,7 +71,7 @@ Tetris.prototype.moveDown = function() {
 	if (!this.figure.moveDown()) {
 		this.writeFigureCells(); // заменяем 2-ки фигуры 1 сетки
 		delete this.figure;      //на всякий случай
-		this.figure = new TetrisSquare(this, 2);/**@TODO *///надо заменить на рандомное создание
+		this.figure = new TetrisL(this);/**@TODO *///надо заменить на рандомное создание
 	}
 }
 /**
@@ -332,6 +332,7 @@ Tetris.prototype.onBottomButtonClick = function(e) {
 Tetris.prototype.onRotateButtonClick = function(e) {
 	var self = e.target;
 	console.log('aga rt');
+	SE2D.app.figure.rotate();
 }
 /**
  * @description 

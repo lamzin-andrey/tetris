@@ -4,6 +4,7 @@
  * @var {Tetris} tetris
 */
 function TetrisSquare(t, n) {
+	n = n ? n : 2;
 	this.init(t, n);
 	this.createBlock(1, 1, 0)
 	this.createBlock(2, 0, 1);
