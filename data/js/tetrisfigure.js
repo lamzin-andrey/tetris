@@ -61,7 +61,7 @@ TetrisFigure.prototype.addFigure = function() {
  * @return {Bool}   true если пространство свободно
 */
 TetrisFigure.prototype.checkSpaceUtil = function(info, max, secondRowI, thirdRowI, fourthRowI, fifthRowI) {
-	secondRowI  = secondRowI ? secondRowI : 9;
+	secondRowI = secondRowI ? secondRowI : 9;
 	thirdRowI  = thirdRowI ? thirdRowI : 9;
 	fourthRowI = fourthRowI ? fourthRowI : 9;
 	fifthRowI  = fifthRowI ? fifthRowI : 9;
