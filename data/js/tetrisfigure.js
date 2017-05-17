@@ -70,22 +70,24 @@ TetrisFigure.prototype.checkSpaceUtil = function(info, max, secondRowI, thirdRow
 		J = this.cellJ + this.blocks[i].offsetX;
 		I = this.cellI + this.blocks[i].offsetY;
 		//console.log( this.t.workGrid[I][J] );
-		if (this.t.workGrid[I] && this.t.workGrid[I][J] == 1 || String(this.t.workGrid[I][J])  == 'undefined') {
-			result = false;
-			if (i > fifthRowI) { 
-				v = 5;
-			} else if (i > fourthRowI)  {
-				v = 4;
-			} else if (i > thirdRowI)   {
-				v = 3;
-			}  else if (i > secondRowI) {
-				v = 2;
-			}  else if (i > firstRowI)  {
-				v = 1;
+		if (this.t.workGrid && this.t.workGrid[I]) {
+			if (this.t.workGrid[I][J] == 1 || String(this.t.workGrid[I][J])  == 'undefined') {
+				result = false;
+				if (i > fifthRowI) { 
+					v = 5;
+				} else if (i > fourthRowI)  {
+					v = 4;
+				} else if (i > thirdRowI)   {
+					v = 3;
+				}  else if (i > secondRowI) {
+					v = 2;
+				}  else if (i > firstRowI)  {
+					v = 1;
+				}
+				info.v = max - v + 1;
+				info.i = i;
+				break;
 			}
-			info.v = max - v + 1;
-			info.i = i;
-			break;
 		}
 	}
 	return result;

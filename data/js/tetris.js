@@ -34,7 +34,7 @@ Tetris.prototype.onInit = function() {
 		this.app.fon.visible = 1;
 		this.app.addConrtolsArea();
 		this.app.loadMap();
-		var t = new TetrisX(this.app);
+		var t = new TetrisLM(this.app);
 		return;
 		if (window.runUnittest && runUnittest instanceof Function) {
 			runUnittest();
@@ -71,7 +71,7 @@ Tetris.prototype.moveDown = function() {
 	if (!this.figure.moveDown()) {
 		this.writeFigureCells(); // заменяем 2-ки фигуры 1 сетки
 		delete this.figure;      //на всякий случай
-		this.figure = new TetrisX(this);/**@TODO *///надо заменить на рандомное создание
+		this.figure = new TetrisLM(this);/**@TODO *///надо заменить на рандомное создание
 	}
 }
 /**
@@ -350,7 +350,9 @@ Tetris.prototype.drawBrick = function(cellJ, cellI) {
 	var p = this.c_brick, iX = this.workGridCellSz.x * cellJ,
 		iY = this.workGridCellSz.y * cellI;
 	mc = p.clone(iX, iY, '', 1);
-	this.workGrid[cellI][cellJ] = 2;
+	if (this.workGrid[cellI]) {
+		this.workGrid[cellI][cellJ] = 2;
+	}
 	return mc;
 }
 /**
