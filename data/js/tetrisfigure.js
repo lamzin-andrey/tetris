@@ -44,7 +44,7 @@ TetrisFigure.prototype.addFigure = function() {
 		obj.sprites.push( obj.t.drawBrick(obj.cellJ + obj.blocks[i].offsetX, obj.cellI + obj.blocks[i].offsetY) );
 	}
 	if (!success) {
-		obj.t.onVRowComplete();
+		obj.t.onHRowComplete();
 	} else {
 		obj.t.setActiveFigure(obj);
 	}
@@ -70,7 +70,7 @@ TetrisFigure.prototype.checkSpaceUtil = function(info, max, secondRowI, thirdRow
 		J = this.cellJ + this.blocks[i].offsetX;
 		I = this.cellI + this.blocks[i].offsetY;
 		//console.log( this.t.workGrid[I][J] );
-		if (this.t.workGrid[I][J] == 1 || String(this.t.workGrid[I][J])  == 'undefined') {
+		if (this.t.workGrid[I] && this.t.workGrid[I][J] == 1 || String(this.t.workGrid[I][J])  == 'undefined') {
 			result = false;
 			if (i > fifthRowI) { 
 				v = 5;
