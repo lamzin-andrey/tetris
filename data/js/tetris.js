@@ -34,7 +34,7 @@ Tetris.prototype.onInit = function() {
 		this.app.fon.visible = 1;
 		this.app.addConrtolsArea();
 		this.app.loadMap();
-		var t = new TetrisZM(this.app);
+		var t = this.app.getRandomFigure();
 		return;
 		if (window.runUnittest && runUnittest instanceof Function) {
 			runUnittest();
@@ -69,9 +69,14 @@ Tetris.prototype.moveDown = function() {
 		return;
 	}
 	if (!this.figure.moveDown()) {
-		this.writeFigureCells(); // заменяем 2-ки фигуры 1 сетки
+		try {
+			this.writeFigureCells(); // заменяем 2-ки фигуры 1 сетки
+		}catch (e) {
+			this.onVRowComplete();
+		}
 		delete this.figure;      //на всякий случай
-		this.figure = new TetrisZM(this);/**@TODO *///надо заменить на рандомное создание
+		this.checkHRow();
+		this.figure = this.getRandomFigure();
 	}
 }
 /**
@@ -82,96 +87,6 @@ Tetris.prototype.writeFigureCells = function() {
 		//console.log(i);
 		this.writeWorkGridCell(this.figure.sprites[i], 1, false);
 	}
-}
-/**
- * @TODO deprecated
- * @description this is Tetris
-*/
-Tetris.prototype.moveBall = function() {
-	var mc = this.ball;
-	if (!mc) return;
-	//bounds screen
-	var  x = mc.x + mc.dx, y = mc.y + mc.dy, i, hitInfo = {};
-	
-	if ( x <= 0 ) {
-		mc.dx *= -1;
-		x = 1;
-		this.random(mc);
-	}
-	if (x >= SE2D.w - mc.w) {
-		x = SE2D.w - mc.w -1;
-		mc.dx *= -1;
-		this.random(mc);
-	}
-	if (y <= 0) {
-		y = 1;
-		mc.dy *= -1;
-		this.random(mc);
-	}
-	if(y >= 1.3*SE2D.h /*- mc.h*/) {
-		/*y = SE2D.h - mc.h -1;
-		mc.dy *= -1;*/
-		x = 12;
-		y = 10;
-		this.random(mc);
-	}
-	
-	//TODO
-	//получить координаты квадрата от координат шара
-	//получить список спрайтов в этом квадрате
-	//для каждого спрайта выполнить код ниже
-	if (mc.dc) {//if danger collision
-		for (i = 0; i < mc.dc; i++) {
-			var id = mc.nearSprites[i],
-				collision = 0;
-			
-			//console.log(id);
-			if ( SE2D._root[id].hitTest && SE2D._root[id].hitTest({x:x, y:y, w:mc.w, h:mc.h}, hitInfo) ) {
-				if (SE2D._root[id].vertical) {
-					mc.dx *= -1;
-					x = mc.x + mc.dx;
-				} else if (SE2D._root[id].horizontal) {
-					mc.dy *= -1;
-					y = mc.y + mc.dy;
-				} else {
-					if (hitInfo.t) {
-						mc.dy *= -1;
-						y = mc.y + mc.dy;
-						collision = 1;
-					}
-					if (hitInfo.b) {
-						mc.dy *= -1;
-						y = mc.y + mc.dy;
-						collision = 1;
-					}
-					if (hitInfo.l) {
-						mc.dx *= -1;
-						x = mc.x + mc.dx;
-						collision = 1;
-					}
-					if (hitInfo.r) {
-						mc.dx *= -1;
-						x = mc.x + mc.dx;
-						collision = 1;
-					}
-					/*if (collision && (mc.dx == mc.dy)) {
-						mc.dx++;
-						if (!mc.dx) {
-							mc.dx -= 2;
-						}
-						x = mc.x + mc.dx;
-					}*/
-				}
-			}
-		}
-	}
-	this.random(mc);
-	//это лишь пример обработки
-	if ( this.board.hitTest({x:x, y:y, w:mc.w, h:mc.h}) ) {
-		mc.dy *= -1;
-		y = mc.y + mc.dy;
-	}
-	mc.go(x, y);
 }
 
 /**
@@ -187,7 +102,7 @@ Tetris.prototype.loadMap = function() {
 	
 	//render hor wall
 	//TODO set map values
-	console.log( this.workGrid );
+	//console.log( this.workGrid );
 	while (iX >= 0) {
 		if (!lastSpace && U.rand(1, 100) % 5 == 0) {
 			countSpace++;
@@ -308,7 +223,7 @@ Tetris.prototype.writeWorkGridCell = function(clip, v, all) {
 Tetris.prototype.onLeftButtonClick = function(e) {
 	var self = e.target;
 	SE2D.app.figure.moveLeft();
-	console.log('aga');
+	//console.log('aga');
 }
 /**
  * @description 
@@ -324,14 +239,14 @@ Tetris.prototype.onRightButtonClick = function(e) {
 Tetris.prototype.onBottomButtonClick = function(e) {
 	var self = e.target;
 	SE2D.app.moveDown();
-	console.log('aga btm');
+	//console.log('aga btm');
 }
 /**
  * @description 
 */
 Tetris.prototype.onRotateButtonClick = function(e) {
 	var self = e.target;
-	console.log('aga rt');
+	//console.log('aga rt');
 	SE2D.app.figure.rotate();
 }
 /**
@@ -358,7 +273,8 @@ Tetris.prototype.drawBrick = function(cellJ, cellI) {
 /**
  * @description Обработка заполненого вертикального столбца, по сути gameOver
 */
-Tetris.prototype.onHRowComplete = function() {
+Tetris.prototype.onVRowComplete = function() {
+	console.log('ICall');
 	//startGameOverAnimation
 	//onFin = function( callGameOverScreen)
 	//onFin = function(callBeginScreen )
@@ -368,4 +284,66 @@ Tetris.prototype.onHRowComplete = function() {
 */
 Tetris.prototype.setActiveFigure = function(figure) {
 	this.figure = figure;
+}
+Tetris.prototype.getRandomFigure = function() {
+	var n = U.rand(0, 9),
+		classes = ['L', 'Square', 'Line', 'LM', 'Z', 'ZM', 'X'];
+	if (n > 6 && n < 8) {
+		n = 6;
+	}else if(n > 6) {
+		n = 0;
+	}
+	n = 'Tetris' + classes[n];
+	return new window[n](this);
+}
+/**
+ * @description Проверяет, нет ли заполненного  горизонтального ряда, удаляет такой ряд.
+*/
+Tetris.prototype.checkHRow = function() {
+	console.log(this.workGrid);
+	var i, j, h = this.workGrid[0] ? this.workGrid[0].length : 0,
+		complete = 0;
+	//TODO 	глядя в initMap понять, как это дело (36) посчитать
+	for (i = 0; i < 36/*this.workGrid.length*/; i++) {
+		for (j = 0; j < h; j++) {
+			if (this.workGrid[i][j] == 1) {
+				complete = 1;
+			} else {
+				complete = 0;
+				break;
+			}
+		}
+		if (complete) {
+			this.removeRow(i);
+		}
+	}
+}
+Tetris.prototype.removeRow = function(i) {
+	var sz = SE2D.sprites.length, j, sp, k, isBusy;
+	this.workGrid[i][j] = 0;//TODO очистить в  checkHRow
+	for (j = 0; j < SE2D.sprites.length; j++) {
+		
+		sp = SE2D.sprites[j];
+		//console.log(sp.y + ', id = ' + sp.id);
+		if (sp.id.indexOf('c_brick_') == -1) {
+			continue;
+		}
+		if (sp.y == i * SE2D.gridCell) {
+			SE2D.remove(sp.id);
+		} else if (sp.y < i * SE2D.gridCell) {
+			isBusy = 0;
+			if (this.figure && this.figure.sprites) {
+				for (k = 0; k < this.figure.sprites.length; k++) {
+					if(this.figure.sprites[k].id == sp.id) {
+						isBusy = 1;
+						break;
+					}
+				}
+			}
+			if (!isBusy) {
+				sp.go(sp.x, sp.y + SE2D.gridCell);
+			}
+		}
+	}
+	console.log('Will remove row ' + i);
 }

@@ -44,7 +44,7 @@ TetrisFigure.prototype.addFigure = function() {
 		obj.sprites.push( obj.t.drawBrick(obj.cellJ + obj.blocks[i].offsetX, obj.cellI + obj.blocks[i].offsetY) );
 	}
 	if (!success) {
-		obj.t.onHRowComplete();
+		obj.t.onVRowComplete();
 	} else {
 		obj.t.setActiveFigure(obj);
 	}
