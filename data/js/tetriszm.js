@@ -2,6 +2,9 @@
 /**
  * @class TetrisZM
  * @var {Tetris} tetris
+ *   23 
+ *  01
+ *   
 */
 function TetrisZM(t, n) {
 	n = n ? n : 3;
@@ -48,35 +51,28 @@ TetrisZM.prototype.rotate = function() {
 }
 /**
  * @description Повернуть с горизонтального состояния в вертикальное
+ *   23    -> 2
+ *  01        01
+ *             3
+ * (при этом 0 остается на месте) 
 */
 TetrisZM.prototype.rotateToV = function() {
-	var i, info = {}, s = this.t.workGridCellSz.x;
-	this.blocks[1].offsetX = 1;
-	this.blocks[1].offsetY = 0;
+	var i, info = {}, s = this.t.workGridCellSz.x,
+		safeOffsets = this.getAllOffsets();//TODO getAllOffsets in base
 	
-	this.blocks[2].offsetX = 0;
-	this.blocks[2].offsetY = 1;
+	this.blocks[2].offsetX = -1;
+	this.blocks[2].offsetY = 0;
 	
-	this.blocks[3].offsetX = 1;
-	this.blocks[3].offsetY = -1;
+	this.blocks[3].offsetX = -1;
+	this.blocks[3].offsetY = 2;
 	
 	
 	if (!this.checkSpace(info)) {
-		this.blocks[1].offsetX = 1;
-		this.blocks[1].offsetY = 0;
-		
-		this.blocks[2].offsetX = 1;
-		this.blocks[2].offsetY = -1;
-		
-		this.blocks[3].offsetX = 2;
-		this.blocks[3].offsetY = -1;
-	
+		this.restoreOffsets(safeOffsets); //TODO restoreOffsets in base
 	} else {
-		this.sprites[1].go(this.sprites[0].x + s, this.sprites[0].y);
-		this.sprites[2].go(this.sprites[0].x + 0*s, this.sprites[0].y + s);
-		this.sprites[3].go(this.sprites[0].x + s, this.sprites[0].y - 1 * s);
+		this.sprites[2].go(this.sprites[0].x, this.sprites[0].y - s);
+		this.sprites[3].go(this.sprites[0].x + s, this.sprites[0].y + s);
 		this.isH = 0;
-		//this.moveRight();
 	}
 }
 /**

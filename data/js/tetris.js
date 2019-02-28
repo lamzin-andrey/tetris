@@ -11,7 +11,7 @@ function Tetris() {
 	SE2D.app = SE2D.canvas.app = this;// SE2D.setApp(this);
 	SE2D.gridCell = 8; //для оптимизации расчета столкновений, 8 взято как сторона "кирпича"
 	SE2D.onLoadImages = this.onInit;
-	SE2D.addGraphResources(["data/images/phone.png", "fon",
+	SE2D.addGraphResources(["data/images/phone0.png", "fon",
 		"data/images/brick.png", "c_brick",
 		"data/images/quest.png", "quest",
 		"data/images/left.png", "left",
@@ -318,8 +318,13 @@ Tetris.prototype.checkHRow = function() {
 		}
 	}
 }
+/**
+ * @description Удаляем заполненную строку
+*/
 Tetris.prototype.removeRow = function(i) {
-	var sz = SE2D.sprites.length, j, sp, k, isBusy;
+	/*
+	 * Это глючный алгоритм
+	 * var sz = SE2D.sprites.length, j, sp, k, isBusy;
 	this.workGrid[i][j] = 0;//TODO очистить в  checkHRow
 	for (j = 0; j < SE2D.sprites.length; j++) {
 		
@@ -344,6 +349,21 @@ Tetris.prototype.removeRow = function(i) {
 				sp.go(sp.x, sp.y + SE2D.gridCell);
 			}
 		}
-	}
+	}*/
 	console.log('Will remove row ' + i);
+	//1 Для строки записать 0 в ячейки
+	//Для всех спрайтов, если "внизу" 0 сделать MoveDown
+	
+	//Надо бы сделать, чтобы каждый "кирпич" знал в какой ячейке рабочей сетки он есть
+	// - у нас знает об этом каждый спрайт - фигура
+	//И что с этим делать?.
+	//debug
+	for (var j = 0; j < SE2D.sprites.length; j++) {
+		var sp = SE2D.sprites[j];
+		if (sp.id.indexOf('c_brick_') == -1) {
+			continue;
+		}
+		console.log(sp);
+		break;
+	}
 }

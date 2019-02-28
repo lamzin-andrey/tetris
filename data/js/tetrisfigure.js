@@ -153,4 +153,32 @@ TetrisFigure.prototype.rotate = function() {}
 TetrisFigure.prototype.createBlock = function(index, offsetX, offsetY) {
 	this.blocks[index] = {offsetX:offsetX, offsetY:offsetY};
 }
+/**
+ * @description Восстанавливает оффсеты из массива, ранее возвращённого getAllOffsets
+ * @param {Array of {oX, oY}} safeOffsets
+*/
+TetrisFigure.prototype.restoreOffsets = function(safeOffsets) {
+	//this.blocks[index] = {offsetX:offsetX, offsetY:offsetY};
+	var i;
+	for (i = 0; i < this.blocks.length; i++) {
+		//if (safeOffsets[i]) {
+		this.blocks[i].offsetX = safeOffsets[i].oX;
+		this.blocks[i].offsetY = safeOffsets[i].oY;
+		//}
+	}
+}
+/**
+ * @description Формирует массив объектов с информацией об оффсетах фигуры
+ * @return {Array of {oX, oY}} safeOffsets
+*/
+TetrisFigure.prototype.getAllOffsets = function(safeOffsets) {
+	var i, a = [], o;
+	for (i = 0; i < this.blocks.length; i++) {
+		o = new Object();
+		o.oX = this.blocks[i].offsetX;
+		o.oY = this.blocks[i].offsetY;
+		a.push(o);
+	}
+	return a;
+}
 //======================================================================
