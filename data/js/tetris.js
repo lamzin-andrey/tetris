@@ -93,13 +93,15 @@ Tetris.prototype.writeFigureCells = function() {
  * @description 
 */
 Tetris.prototype.loadMap = function() {
+	/** @property {Number} areaW ширина холста минус область кнопок, приведённая к целому */
+	
 	var p = this.c_brick, iX = this.areaW - 2*p.w, iY/* = SE2D.h - U.round(8 * SE2D.h / 70)*/, siY = iY, mc,
 		countSpace = 0, lastSpace = 0, y;
 		//беру 10 процентов от высоты сетки и выравниваю по верхней строке
 		y = U.getPercents(10, SE2D.h);
 		y = Math.ceil(y / SE2D.gridCell);//сколько ячеек укладывается в 5 процентах
 		iY = SE2D.h - y * SE2D.gridCell;
-	
+	this.lastRowIndex = this.getRowIndex(iY);
 	//render hor wall
 	//TODO set map values
 	//console.log( this.workGrid );
@@ -113,7 +115,7 @@ Tetris.prototype.loadMap = function() {
 		lastSpace = 0;
 		mc = p.clone(iX, iY, '', 1);
 		mc.horizontal = 1;
-		this.writeWorkGridCell(mc, 1);
+		this.writeWorkGridCell(mc, 1, false, true);
 		iX -= p.w;
 	}
 }
@@ -124,6 +126,7 @@ Tetris.prototype.loadMap = function() {
  */
 Tetris.prototype.addConrtolsArea = function() {
 	var workAr = /*4 * SE2D.w / 5*/SE2D.w - 64, x, y, br = this.c_brick, iX, iY, vl = this.vl;
+	/** @property {Number} areaW ширина холста минус область кнопок, приведённая к целому */
 	this.areaW = x =  Math.floor(workAr / br.w) * br.w;
 	//TODO set workmap
 	y = SE2D.gridCell;
@@ -191,17 +194,20 @@ Tetris.prototype.initWorkGrid = function(width, height, cellSiz) {
  * @param {Object x, y, w, h} clip
  * @param {Number} v
 */
-Tetris.prototype.writeWorkGridCell = function(clip, v, all) {
+Tetris.prototype.writeWorkGridCell = function(clip, v, all, dbg) {
 	if (String(all) == "undefined") {
 		all = true;
 	}
 	var self = this;
 	//console.log(self.workGrid);
 	function _write(x, y, v) {
-		var j = Math.floor(x / self.workGridCellSz.x),
-			i = Math.floor(y / self.workGridCellSz.y);
+		var j = self.getCellIndex(x),
+			i = self.getRowIndex(y);
 		if (self.workGrid[i]) {
 			if (self.workGrid[i][j] || self.workGrid[i][j] === 0) {
+				if (dbg) {
+					console.log('i', i);
+				}
 				self.workGrid[i][j] = v;
 			} else {
 				throw new Error('Cell ' + i + ', ' + j + ' not exists in workGrid');
@@ -286,6 +292,31 @@ Tetris.prototype.setActiveFigure = function(figure) {
 	this.figure = figure;
 }
 Tetris.prototype.getRandomFigure = function() {
+	//Это фикс бага, три предопределенных фигуры
+	/*if (String(window.dbgI) == 'undefined') {
+		window.dbgI = 0;
+	}
+	var s = '';
+	if (window.dbgI < 3) {
+		switch (dbgI) {
+			case 0:
+				s = 'Line';
+				break;
+			case 1:
+				s = 'L';
+				break;
+			case 2:
+				s = 'Z';
+				break;
+		}
+		var n = 'Tetris' + s;
+		console.log(n);
+		dbgI++;
+		return new window[n](this);
+	}*/
+	//end fix code
+	
+	//это рабочий код
 	var n = U.rand(0, 9),
 		classes = ['L', 'Square', 'Line', 'LM', 'Z', 'ZM', 'X'];
 	if (n > 6 && n < 8) {
@@ -303,8 +334,7 @@ Tetris.prototype.checkHRow = function() {
 	console.log(this.workGrid);
 	var i, j, h = this.workGrid[0] ? this.workGrid[0].length : 0,
 		complete = 0;
-	//TODO 	глядя в initMap понять, как это дело (36) посчитать
-	for (i = 0; i < 36/*this.workGrid.length*/; i++) {
+	for (i = 0; i < this.lastRowIndex /*this.workGrid.length*/ ; i++) {
 		for (j = 0; j < h; j++) {
 			if (this.workGrid[i][j] == 1) {
 				complete = 1;
@@ -319,6 +349,7 @@ Tetris.prototype.checkHRow = function() {
 	}
 }
 /**
+ * TODO stop here
  * @description Удаляем заполненную строку
 */
 Tetris.prototype.removeRow = function(i) {
@@ -366,4 +397,19 @@ Tetris.prototype.removeRow = function(i) {
 		console.log(sp);
 		break;
 	}
+}
+/**
+ * @description Получить номер "строки" по y координате "кирпича"
+ * @param {Number} y
+*/
+Tetris.prototype.getRowIndex = function(y) {
+	return Math.floor(y / this.workGridCellSz.y);
+}
+
+/**
+ * @description Получить номер "строки" по x координате "кирпича"
+ * @param {Number} x
+*/
+Tetris.prototype.getCellIndex = function(x) {
+	return Math.floor(x / this.workGridCellSz.x);
 }

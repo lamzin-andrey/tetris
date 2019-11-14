@@ -50,7 +50,8 @@ TetrisFigure.prototype.addFigure = function() {
 	}
 }
 /**
- * @description записывает в info количество занятых рядов в пространстве в которое собираемся поместить фигуру, info.v может быть 0, 1 ,2
+ * @description записывает в info количество занятых рядов в пространстве в которое собираемся поместить фигуру, 
+ * info.v может быть 0, 1 ,2
  * @param {Object}  {v} info
  * @param {Number}  max   максимальное количество рядов в фигуре
  * @var   {Number}  firstRowI   если i > этого значения, пошел первый ряд фигуры
@@ -60,7 +61,7 @@ TetrisFigure.prototype.addFigure = function() {
  * @param {Number}  fifthRowI   если i > этого значения, пошел пятый ряд фигуры
  * @return {Bool}   true если пространство свободно
 */
-TetrisFigure.prototype.checkSpaceUtil = function(info, max, secondRowI, thirdRowI, fourthRowI, fifthRowI) {
+TetrisFigure.prototype.checkSpaceUtil = function(info, max, secondRowI, thirdRowI, fourthRowI, fifthRowI, dbg) {
 	secondRowI = secondRowI ? secondRowI : 9;
 	thirdRowI  = thirdRowI ? thirdRowI : 9;
 	fourthRowI = fourthRowI ? fourthRowI : 9;
@@ -72,6 +73,12 @@ TetrisFigure.prototype.checkSpaceUtil = function(info, max, secondRowI, thirdRow
 		//console.log( this.t.workGrid[I][J] );
 		if (this.t.workGrid && this.t.workGrid[I]) {
 			if (this.t.workGrid[I][J] == 1 || String(this.t.workGrid[I][J])  == 'undefined') {
+				if (dbg) {
+					console.log('because (this.t.workGrid[I][J] == 1) IS ' + (this.t.workGrid[I][J] == 1 ? 'true' : 'false') );
+					console.log('because (String(this.t.workGrid[I][J])  == undefined) IS ' + (String(this.t.workGrid[I][J])  == 'undefined' ? 'true' : 'false') );
+					console.log('I', I);
+					console.log('J', J);
+				}
 				result = false;
 				if (i > fifthRowI) { 
 					v = 5;
