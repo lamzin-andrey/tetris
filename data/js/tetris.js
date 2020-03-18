@@ -343,24 +343,69 @@ Tetris.prototype.checkHRow = function() {
 			}
 		}
 		if (complete) {
+			//TODO score
 			this.removeRow(i, h);
-			//this.shiftDown(i);//TODO сдвинуть вниз все связанные кирпичи
+			this.shiftDown(i - 1, h);//TODO сдвинуть вниз все связанные кирпичи
 		}
 	}
 }
 /**
- * TODO stop here
+ * @description Перемещаем все кирпичи расположенные выше вниз
+ * @param {Number} nR номер строки (ряда)
+ * @param {Number} n Количество "кирпичей" в ряде
+*/
+Tetris.prototype.shiftDown = function(nR, n) {
+	var i, j, next, sp, id, aClipsIdList, k, y, x;
+	for (i = nR; i > -1; i-- ) {
+		//console.log('process nR = ' + i);
+		for (j = 0; j < n; j++) {
+			//if next cell containts 0
+			if (this.workGrid[i + 1][j] == 0) {
+				//sp = getSprite
+				id = i + '_' + j;
+				aClipsIdList = SE2D.grid && SE2D.grid[id] ? SE2D.grid[id] : 0;
+				if (aClipsIdList) {
+					for (k in aClipsIdList) {
+						y = SE2D._root[k] ? SE2D._root[k].y : 'nl';
+						x = SE2D._root[k] ? SE2D._root[k].x : 'nl';
+						if (y != 'nl' && i == Math.floor(y / SE2D.gridCell)) {
+							if (x != 'nl' && j  == Math.floor(x / SE2D.gridCell)) {
+								sp = SE2D._root[k];
+								if (sp) {
+									sp.go(x, y + SE2D.gridCell);
+									//console.log('clear cell ' + i + ', j = ' + j);
+									this.workGrid[i][j] = 0;
+									this.workGrid[i + 1][j] = 1;
+								} else {
+									//console.log(k + ' not found, next is ' + this.workGrid[i + 1][j] + ' for cell ' + j + ', nR = ' + nR);
+								}
+							}
+						}
+					}
+				} else {
+					//console.log('Cell has not clips, clear cell ' + i + ', j = ' + j);
+					this.workGrid[i][j] = 0;
+				}
+				
+			}/* else {
+				console.log(i + ' = nR, next is ' + this.workGrid[i + 1][j] + ' for cell ' + j);
+			}*/
+		}
+	}
+	this.checkHRow();//TODO тут есть опасность бесконечной рекурсии, подумать
+}
+/**
  * @description Удаляем заполненную строку
  * @param {Number} nR номер строки (ряда)
  * @param {Number} n Количество "кирпичей" в ряде
 */
 Tetris.prototype.removeRow = function(nR, n) {
 	//Попробуем использовать SE2D.grid
-	console.log('Will remove ' + i);
-	console.log(SE2D.grid);
+	//console.log('Will remove ' + i);
+	//console.log(SE2D.grid);
 	var i, id, aClipsIdList, j, y;
 	//Удаляем связанные спрайты
-	for (i = 0; i <= n; i++) {
+	for (i = 0; i < n; i++) {
 		id = nR + '_' + i;
 		aClipsIdList = SE2D.grid && SE2D.grid[id] ? SE2D.grid[id] : 0;
 		aClipsIdList = U.clone(aClipsIdList);
@@ -368,10 +413,8 @@ Tetris.prototype.removeRow = function(nR, n) {
 			for (j in aClipsIdList) {
 				y = SE2D._root[j] ? SE2D._root[j].y : 0;
 				if (y && nR == Math.floor(y / SE2D.gridCell)) {
-					//Тут скорее всего надо поправить код SE2D.remove чтобы данные о клипах в сетке удалялись
 					SE2D.remove(j);
 				}
-				
 			}
 		}
 		//В соответствующие ячейки WorkGrid пишем, что там свободно
