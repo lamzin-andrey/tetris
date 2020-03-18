@@ -237,7 +237,6 @@ Tetris.prototype.onLeftButtonClick = function(e) {
 Tetris.prototype.onRightButtonClick = function(e) {
 	var self = e.target;
 	SE2D.app.figure.moveRight();
-	console.log('aga r');
 }
 /**
  * @description 
@@ -344,59 +343,42 @@ Tetris.prototype.checkHRow = function() {
 			}
 		}
 		if (complete) {
-			this.removeRow(i);
+			this.removeRow(i, h);
+			//this.shiftDown(i);//TODO сдвинуть вниз все связанные кирпичи
 		}
 	}
 }
 /**
  * TODO stop here
  * @description Удаляем заполненную строку
+ * @param {Number} nR номер строки (ряда)
+ * @param {Number} n Количество "кирпичей" в ряде
 */
-Tetris.prototype.removeRow = function(i) {
-	/*
-	 * Это глючный алгоритм
-	 * var sz = SE2D.sprites.length, j, sp, k, isBusy;
-	this.workGrid[i][j] = 0;//TODO очистить в  checkHRow
-	for (j = 0; j < SE2D.sprites.length; j++) {
-		
-		sp = SE2D.sprites[j];
-		//console.log(sp.y + ', id = ' + sp.id);
-		if (sp.id.indexOf('c_brick_') == -1) {
-			continue;
-		}
-		if (sp.y == i * SE2D.gridCell) {
-			SE2D.remove(sp.id);
-		} else if (sp.y < i * SE2D.gridCell) {
-			isBusy = 0;
-			if (this.figure && this.figure.sprites) {
-				for (k = 0; k < this.figure.sprites.length; k++) {
-					if(this.figure.sprites[k].id == sp.id) {
-						isBusy = 1;
-						break;
-					}
+Tetris.prototype.removeRow = function(nR, n) {
+	//Попробуем использовать SE2D.grid
+	console.log('Will remove ' + i);
+	console.log(SE2D.grid);
+	var i, id, aClipsIdList, j, y;
+	//Удаляем связанные спрайты
+	for (i = 0; i <= n; i++) {
+		id = nR + '_' + i;
+		aClipsIdList = SE2D.grid && SE2D.grid[id] ? SE2D.grid[id] : 0;
+		aClipsIdList = U.clone(aClipsIdList);
+		if (aClipsIdList) {
+			for (j in aClipsIdList) {
+				y = SE2D._root[j] ? SE2D._root[j].y : 0;
+				if (y && nR == Math.floor(y / SE2D.gridCell)) {
+					//Тут скорее всего надо поправить код SE2D.remove чтобы данные о клипах в сетке удалялись
+					SE2D.remove(j);
 				}
-			}
-			if (!isBusy) {
-				sp.go(sp.x, sp.y + SE2D.gridCell);
+				
 			}
 		}
-	}*/
-	console.log('Will remove row ' + i);
-	//1 Для строки записать 0 в ячейки
-	//Для всех спрайтов, если "внизу" 0 сделать MoveDown
-	
-	//Надо бы сделать, чтобы каждый "кирпич" знал в какой ячейке рабочей сетки он есть
-	// - у нас знает об этом каждый спрайт - фигура
-	//И что с этим делать?.
-	//debug
-	for (var j = 0; j < SE2D.sprites.length; j++) {
-		var sp = SE2D.sprites[j];
-		if (sp.id.indexOf('c_brick_') == -1) {
-			continue;
-		}
-		console.log(sp);
-		break;
+		//В соответствующие ячейки WorkGrid пишем, что там свободно
+		this.workGrid[nR][i] = 0;
 	}
+	
+	
 }
 /**
  * @description Получить номер "строки" по y координате "кирпича"
