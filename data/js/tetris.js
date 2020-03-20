@@ -34,11 +34,31 @@ Tetris.prototype.onInit = function() {
 		this.app.fon.visible = 1;
 		this.app.addConrtolsArea();
 		this.app.loadMap();
+		this.app.reset();
+		
 		var t = this.app.getRandomFigure();
 		return;
 		if (window.runUnittest && runUnittest instanceof Function) {
 			runUnittest();
 		}
+}
+/**
+ * @description this is Tetris. Сбрасывает все переменные относящиеся к состоянию игры
+ * 
+*/
+Tetris.prototype.reset = function() {
+	//Сбрасывает только те переменные, которые не относятся к переходу на следующий уровень (например, не сбрасывает очки)
+	this.resetForNextLevel();
+	this.scoreForOneRow = 10;
+	this.score = 0;
+}
+/**
+ * TODO
+ * @description this is Tetris. Сбрасывает только те переменные, которые не относятся к переходу на следующий уровень (например, не сбрасывает очки)
+ * 
+*/
+Tetris.prototype.resetForNextLevel = function() {
+	
 }
 /**
  * @description this is SE2D
@@ -122,7 +142,7 @@ Tetris.prototype.loadMap = function() {
 
 /**
  * @description Вычисляет ширину "стакана", размещает кнопки, устанавливает для них обработчики,
- * TODO устанавливает массив связанный с рабочей областью
+ * 	устанавливает массив связанный с рабочей областью
  */
 Tetris.prototype.addConrtolsArea = function() {
 	var workAr = /*4 * SE2D.w / 5*/SE2D.w - 64, x, y, br = this.c_brick, iX, iY, vl = this.vl;
@@ -330,7 +350,6 @@ Tetris.prototype.getRandomFigure = function() {
  * @description Проверяет, нет ли заполненного  горизонтального ряда, удаляет такой ряд.
 */
 Tetris.prototype.checkHRow = function() {
-	console.log(this.workGrid);
 	var i, j, h = this.workGrid[0] ? this.workGrid[0].length : 0,
 		complete = 0;
 	for (i = 0; i < this.lastRowIndex /*this.workGrid.length*/ ; i++) {
@@ -344,6 +363,7 @@ Tetris.prototype.checkHRow = function() {
 		}
 		if (complete) {
 			//TODO score
+			
 			//TODO сделать так, что если проворонили планку, пусть сверху новая летит
 			//TODO ряд, изображающий границу снизу "не обслуживается". 
 			//  Подумать, зачем это и не стоит ли это пофиксить
