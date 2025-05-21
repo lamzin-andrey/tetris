@@ -79,6 +79,7 @@ Tetris.prototype.onEnterFrame = function(e) {
 		this.app.moveDown();
 		this.app.lastTetrisTick = U.time();
 	}
+	
 }
 /**
  * @description this is Tetris. Перемещает фигуру вниз, если неудачно, записывает данные ячеек фигуры в ячейки сетки (меняя 2 на 1)

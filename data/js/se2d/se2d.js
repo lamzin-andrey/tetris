@@ -68,6 +68,9 @@ var U = {
 	time:function() {
 		return parseInt(new Date().getTime()/1000);
 	},
+	utime:function(){
+	  return new Date().getTime();
+	},
 	/**
 	 * @description Возвращает percent от percents100
 	 * @param {Number} percent
@@ -326,6 +329,7 @@ Sprite.prototype.initSprite = function (img, id, depth) {
 	this.dc; //danger collision - not 0 if in cell exists any sprites
 	this.is_image  = 0; //1 когда спрайт не надо учитывать при обработке столкновений
 	this.visible = 0;
+	this.rotation = 0;
 	this.img = img;
 	this.sourceW = this.w = this._width  = img && img.width ? img.width : 0;
 	this.sourceH = this.h = this._height = img && img.height ? img.height : 0;
@@ -737,6 +741,7 @@ function SimpleEngine2D (canvasId, fps) {
 				SE2D.sprites.push(o);
 				SE2D._root[id] = o;
 				SE2D.setLevelInfo(this, sprite, SE2D.sprites.length - 1);
+				SE2D.sortByDepth();
 			},
 			isRoot: true
 		};
@@ -782,18 +787,29 @@ SimpleEngine2D.prototype.tick = function () {
 */
 SimpleEngine2D.prototype.draw = function(s, offsetX, offsetY, lvl) {
 	var arr = s.childs, i, j, k, L = arr.length,
-		parentScx, parentScy, o;
+		parentScx, parentScy, o,
+		parentScXForPos,
+		rt, crt, x, y, w, h, tx, ty,
+		parentScYForPos;
 	offsetX = offsetX ? offsetX : 0;
 	offsetY = offsetY ? offsetY : 0;
+	rt = s.rotation ? s.rotation : 0;
+	
 	
 	parentScx = s.scaleX;
 	parentScy = s.scaleY;
+	parentScXForPos = 1;
+	parentScYForPos = 1;
 	o = s;
 	while (o.parentClip) {
 		o = o.parentClip;
 		if (!o.isRoot) {
 			parentScx *= o.scaleX;
+			parentScXForPos *= o.scaleX;
 			parentScy *= o.scaleY;
+			parentScYForPos *= o.scaleY;
+			crt = o.rotation ? o.rotation : 0;
+			rt += crt;
 		}
 	}
 	
@@ -821,10 +837,27 @@ SimpleEngine2D.prototype.draw = function(s, offsetX, offsetY, lvl) {
 	
 	if (s.img) {
 		if (!s.fixSize) {
-			SE2D.c.drawImage(s.img, (s.x + offsetX) * parentScx, (s.y + offsetY) * parentScy, s.img.width * parentScx, s.img.height *  parentScy);
+		    x = (parseInt(s.x) + parseInt(offsetX)) * parentScXForPos;
+		    y = (parseInt(s.y) + parseInt(offsetY)) * parentScYForPos;
+		    w = s.img.width * parentScx;
+		    h = s.img.height * parentScy;
+		    tx = x + w/2;
+		    ty = y + h/2;
+		    SE2D.c.translate(tx, ty);
+		    SE2D.c.rotate((rt*Math.PI) / 180);
+		    SE2D.c.translate(-1*tx, -1*ty);
+			SE2D.c.drawImage(s.img, x, y, w, h);
 		} else {
-			SE2D.c.drawImage(s.img, (s.x + offsetX) * parentScx, (s.y + offsetY) * parentScy);
+			x = (parseInt(s.x) + parseInt(offsetX)) * parentScXForPos;
+			y = (parseInt(s.y) + parseInt(offsetY)) * parentScYForPos;
+			tx = x + s.img.width/2;
+		    ty = y + s.img.height/2;
+		    SE2D.c.translate(tx, ty);
+		    SE2D.c.rotate((rt *Math.PI)/180);
+		    SE2D.c.translate(-1*tx, -1*ty);
+			SE2D.c.drawImage(s.img, x, y);
 		}
+		SE2D.c.setTransform(1,0,0,1,0,0);
 	}
 	
 	//Вообще-то Сначала берем графикс и рисуем его, но тут пока так
@@ -845,6 +878,33 @@ SimpleEngine2D.prototype.draw = function(s, offsetX, offsetY, lvl) {
 				}
 			}
 		}
+	}
+}
+/**
+ * @description Переставляет спрайты в соответсвии со значением параметра depth
+*/
+SimpleEngine2D.prototype.sortByDepth = function () {
+	var i, sz, cr;
+	sz = SE2D.sprites.length;
+	SE2D.sprites.sort(function(i, j) {
+		if (i.depth < j.depth) {
+			return -1;
+		}
+		if (i.depth > j.depth) {
+			return 1;
+		}
+		if (i.depth == j.depth) {
+			return 0;
+		}
+	});
+	for (i = 0; i < sz; i++) {
+		SE2D.sprites[i].parentClip.levelsInfo = [];
+		SE2D.sprites[i].levelsInfo = [];
+	}
+	
+	for (i = 0; i < sz; i++) {
+		cr = SE2D.sprites[i];
+		SE2D.setLevelInfo(cr.parentClip, cr, i);
 	}
 }
 /**
