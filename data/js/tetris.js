@@ -116,7 +116,8 @@ Tetris.prototype.loadMap = function() {
 	/** @property {Number} areaW ширина холста минус область кнопок, приведённая к целому */
 	
 	var p = this.c_brick, iX = this.areaW - 2*p.w, iY/* = SE2D.h - U.round(8 * SE2D.h / 70)*/, siY = iY, mc,
-		countSpace = 0, lastSpace = 0, y;
+		countSpace = 0, lastSpace = 0, y,
+		scoreView, tf;
 		//беру 10 процентов от высоты сетки и выравниваю по верхней строке
 		y = U.getPercents(10, SE2D.h);
 		y = Math.ceil(y / SE2D.gridCell);//сколько ячеек укладывается в 5 процентах
@@ -138,6 +139,14 @@ Tetris.prototype.loadMap = function() {
 		this.writeWorkGridCell(mc, 1, false, true);
 		iX -= p.w;
 	}
+	scoreView = new TextField("scoreView");
+	scoreView.go(10, 200);
+	scoreView.visible = 1;
+	scoreView._level = 1;
+	tf = new TextFormat("Arial", 24, 0x00AA00);
+	scoreView.setTextFormat(tf);
+	scoreView.text = "Hello!";
+	SE2D._root.addChild(scoreView);
 }
 
 /**
