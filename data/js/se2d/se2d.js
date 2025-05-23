@@ -799,7 +799,7 @@ function SimpleEngine2D (canvasId, fps) {
 		this.rastrData = [];
 		this.sprites = [];
 		//TODO remove clip from previous parent (doublicate!)
-		this._root = {
+		/*this._root = {
 			addChild: function(sprite) {
 				var o = sprite, id = o.id;
 				if (o.id == 'isRoot' || o.id == 'addChild') {
@@ -815,7 +815,24 @@ function SimpleEngine2D (canvasId, fps) {
 				SE2D.sortByDepth();
 			},
 			isRoot: true
-		};
+		};*/
+		this._root = new Sprite(0, "__mainRoot__", 0);
+		this._root.addChild = function(sprite) {
+			var o = sprite, id = o.id;
+			if (o.id == 'isRoot' || o.id == 'addChild') {
+				Error('Invalid name of the clip "' + o.id + '"');
+			}
+			if (!id) {
+				o.id = id = 's' + SE2D.sprites.length;
+			}
+			o.parentClip = SE2D._root;
+			SE2D.sprites.push(o);
+			SE2D._root[id] = o;
+			SE2D.setLevelInfo(this, sprite, SE2D.sprites.length - 1);
+			SE2D.sortByDepth();
+		}
+		this._root.isRoot = true;
+		
 		this.grid = {};
 		this.__images_length = -1;
 		//для оптимизации расчета столкновений
@@ -836,12 +853,12 @@ SimpleEngine2D.prototype.tick = function () {
 	var sz = SE2D.sprites.length, i, j, k, spr;
 	SE2D.c.clearRect(0, 0, SE2D.w, SE2D.h);
 	
-	for (j = 0; j < SE2D._root.levelsInfo.length; j +=1) {
+	for (j = 0; j < SE2D._root.levelsInfo.length; j += 1) {
 		if (SE2D._root.levelsInfo[j]) {
 			for (k = 0; k < SE2D._root.levelsInfo[j].length; k++) {
 				i = SE2D._root.levelsInfo[j][k];
 				spr = SE2D.sprites[i];
-				if (spr.visible != false) {
+				if (spr && spr.visible != false) {
 					SE2D.draw(spr);
 					spr.setMouseXY();
 				}
@@ -1190,7 +1207,7 @@ SimpleEngine2D.prototype.onMouseMove = function (e) {
  * @param {String}|{Sprite} id
 */
 SimpleEngine2D.prototype.remove = function (id) {
-	var i, copy = [], strId = id, j,
+	var i, copy = [], strId = id, j, k, spr,
 	/** @var {Array of String} aClipIdList идентификаторы клипов, записаных в соответствующую ячейку сетки */
 	aClipIdList, 
 	/** @var {} принимает значения идентификаторов ячееек сетки, в которых записан id клипа */
@@ -1221,6 +1238,19 @@ SimpleEngine2D.prototype.remove = function (id) {
 	for (i in SE2D._root) {
 		if (SE2D._root[i] == id) {
 			delete SE2D._root[i];
+		}
+	}
+	
+	// Patch levelsInfo
+	for (j = 0; j < SE2D._root.levelsInfo.length; j += 1) {
+		if (SE2D._root.levelsInfo[j]) {
+			for (k = 0; k < SE2D._root.levelsInfo[j].length; k++) {
+				i = SE2D._root.levelsInfo[j][k];
+				spr = SE2D.sprites[i];
+				if (!spr) {
+					SE2D._root.levelsInfo[j].splice(k, 1);
+				}
+			}
 		}
 	}
 }
