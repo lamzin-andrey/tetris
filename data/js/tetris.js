@@ -18,7 +18,13 @@ function Tetris() {
 		"data/images/right.png", "right",
 		"data/images/bottom.png", "bottom",
 		"data/images/rotate.png", "rotate",
-		"data/images/vl.png", "c_vert_line"
+		"data/images/vl.png", "c_vert_line",
+		[[
+			[1, "data/images/anim0/01.png"],
+			[24, "data/images/anim0/02.png"],
+			[48, "data/images/anim0/02.png"]
+		], 
+		   0/*lvl*/, [10, 10]/*[xy]*/, [100, 200]/*wh*/, [0.5, 0.7]/*scale*/, 'parentClipId'], "first_anim"
 	]);
 	//SE2D.canvas.onmousemove = this.onMouseMove;
 	SE2D.onEnterFrame = this.onEnterFrame;
@@ -32,6 +38,13 @@ Tetris.prototype.onInit = function() {
 		this.app.vl = SE2D._root.c_vert_line;
 		this.app.fon.is_image = 1;
 		this.app.fon.visible = 1;
+		
+		// first anim
+		this.app.first_anim = SE2D._root.first_anim;
+		this.app.first_anim.visible = 0;
+		this.app.first_anim.go(50, 50);
+		// /first anim
+		
 		this.app.addConrtolsArea();
 		this.app.loadMap();
 		this.app.reset();
@@ -80,6 +93,7 @@ Tetris.prototype.onEnterFrame = function(e) {
 		this.app.lastTetrisTick = U.time();
 	}
 	
+	//SE2D._root.rotate.rotation += 1;
 }
 /**
  * @description this is Tetris. Перемещает фигуру вниз, если неудачно, записывает данные ячеек фигуры в ячейки сетки (меняя 2 на 1)

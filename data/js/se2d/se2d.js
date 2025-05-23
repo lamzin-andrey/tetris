@@ -335,6 +335,10 @@ Sprite.prototype.initSprite = function (img, id, depth) {
 	this.sourceH = this.h = this._height = img && img.height ? img.height : 0;
 	this._scaleX = this._scaleY = 1;
 	this.levelsInfo = [];
+	this.frames = [];
+	this.__keyframes = {};
+	this.currentFrame = 1;
+	this.totalFrames = 1;
 	
 	/** @property {Number} Sprite.scaleX */
 	Object.defineProperty(this, 'scaleX', {
@@ -442,6 +446,7 @@ Sprite.prototype.clone = function (x, y, id, visible) {
 		s.id = id;
 	}
 	s.orign = o;
+	s.frames = U.clone(o.frames);
 	return s;
 }
 /**
@@ -640,6 +645,39 @@ Sprite.prototype.removeAllChilds = function() {
 Sprite.prototype.getChildByName = function(name) {
 	return ( (this.childsMap[name] || this.childsMap[name] === 0) && this.childs[ this.childsMap[name] ] ? this.childs[ this.childsMap[name] ] : null);
 }
+/**
+ * @description Добавить ключевой кадр
+ * @return {Sprite} || null
+*/
+Sprite.prototype.__addFrame = function(img, nKeyframe) {
+	var i, z, o;
+	nKeyframe = nKeyframe ? nKeyframe : 1;
+	o = this;
+	o.totalFrames = 1;
+	o.frames.push([nKeyframe, img]);
+	z = U.sz(o.frames);
+	o.__keyframes[nKeyframe] = z - 1;
+	for (i = 0; i < z; i++) {
+		if (o.frames[i][0] > o.totalFrames) {
+			o.totalFrames = o.frames[i][0];
+		}
+	}
+	o.currentFrame = 1;
+}
+/**
+ * @description Сменить кадр
+ * @return {Sprite} || null
+*/
+Sprite.prototype.__changeFrame = function() {
+	var o = this, img, k;
+	o.currentFrame++;
+	if (o.currentFrame >= o.totalFrames) {
+		o.currentFrame = 1;
+	}
+	k = o.__keyframes[o.currentFrame];
+	(k || 0 === k) ? (img = o.frames[k][1]) : 0;
+	img ? (o.img = img) : 0;
+}
 //=================TextFormat============================================
 /**
  * @param {String} font
@@ -834,6 +872,7 @@ SimpleEngine2D.prototype.draw = function(s, offsetX, offsetY, lvl) {
 		c.strokeStyle = sColor;
 	}
 	
+	s.__changeFrame();
 	
 	if (s.img) {
 		if (!s.fixSize) {
@@ -911,9 +950,8 @@ SimpleEngine2D.prototype.sortByDepth = function () {
  * @param {String} path to image
  * @param {String} rastrId
 */
-SimpleEngine2D.prototype.addRastr = function (src, rastrId) {
+SimpleEngine2D.prototype.addRastr = function (src, rastrId, nKeyframe, level, aPoint, aSz, aScale, parentMcId) {
 	//console.log(rastrId);
-	
 	var i = new Image();
 	this.rastrData.push(i);
 	i.depth = this.rastrData.length - 1;
@@ -921,6 +959,12 @@ SimpleEngine2D.prototype.addRastr = function (src, rastrId) {
 	i.id = rastrId;
 	i.onload = this.onLoadImage;
 	i.onerror = this.onErrorLoadImage;
+	i.nKeyframe = nKeyframe;
+	i.level = level;
+	i.aPoint = aPoint;
+	i.aSz = aSz;
+	i.scale = aScale;
+	i.parentMcId = parentMcId;
 	i.src = src;
 }
 /**
@@ -936,19 +980,38 @@ SimpleEngine2D.prototype.addGraphResources = function (args) {
 	//А в onLoadImages если такой se2d._root[img.id] уже есть
 	//просто добавляем очередной кадр se2d._root[img.id].addFrame(img);
 	
-	var sz = U.sz(args), i = 0, half = sz / 2;
-	/*console.log(half + ", " + Math.round(half) + ", " + sz);
-	console.log(args);*/
+	var sz = U.sz(args), i, half = sz / 2, j, ssz;
 	
 	if (half != Math.round(half)) {
 		throw "Need odd count items in first arument for SE2D.addGraphResources";
 	}
-	this.__images_count = this.__images_length = sz / 2;
+	this.setImagesCount(args, sz);
 	for (i = 0; i < sz; i += 2) {
 		if (i + 1 < sz) {
-			this.addRastr(args[i], args[i + 1]);
+			if ((args[i] instanceof Array) && (args[i][0] instanceof Array)) {
+				ssz = U.sz(args[i][0]);
+				for (j = 0; j < ssz; j++) {
+					this.addRastr(args[i][0][j][1], args[i + 1], args[i][0][j][0], args[i][1], args[i][2], args[i][3], args[i][4], args[i][5]);
+				}
+			} else {
+				this.addRastr(args[i], args[i + 1]);
+			}
 		}
 	}
+}
+
+SimpleEngine2D.prototype.setImagesCount = function(args, sz) {
+	//this.__images_count = this.__images_length = sz / 2;
+	var i, o = this;
+	o.__images_count = 0;
+	for (i = 0; i < sz; i += 2) {
+		if ((args[i] instanceof Array) && (args[i][0] instanceof Array)) {
+			o.__images_count += U.sz(args[i][0]);
+		} else {
+			o.__images_count++;
+		}
+	}
+	o.__images_length = o.__images_count;
 }
 /**
  * Вызывается после загрузки очередного изображения
@@ -956,17 +1019,71 @@ SimpleEngine2D.prototype.addGraphResources = function (args) {
  * @param {Event} evt
  * */
 SimpleEngine2D.prototype.onLoadImage = function () {
-	var img = this, se2d = img.se2d, o = new Sprite(img, img.id, img.depth);
-	se2d._root[img.id] = o;
-	se2d.sprites.push(o);
-	o._level = o._level ? o._level : SE2D.DEFAULT_LEVEL;
-	SE2D.setLevelInfo(se2d._root, o, se2d.sprites.length - 1);
-	o.parentClip = se2d._root;
+	var img = this, se2d = img.se2d, o,
+			i, z, parentMc = se2d._root, parentMcFound = 0;
+	
+	o = se2d._root[img.id];
+	
+	if (!o) {
+		// TODO 2025 разобраться, как его найти
+		z = U.sz(SE2D.sprites);
+		if (img.parentMcId) {
+			for (i = 0; i < z; i++) {
+				if (SE2D.sprites[i].id == img.parentMcId) {
+					parentMc = SE2D.sprites[i];
+					o = parentMc.getChildByName(img.id);
+					parentMcFound = 1;
+					break;
+				}
+			}
+		}
+	}
+	
+	if (!o) {
+		o = new Sprite(img, img.id, img.depth);
+		se2d._root[img.id] = o;
+		se2d.sprites.push(o);
+		img.level ? (o._level = img.level) : (o._level = 0);
+		
+		
+		o._level = o._level ? o._level : SE2D.DEFAULT_LEVEL;
+		SE2D.setLevelInfo(se2d._root, o, se2d.sprites.length - 1);
+		
+		if (img.id == 'first_anim') {
+			console.log('FAL', o._level, o.depth);
+		}
+		
+		o.parentClip = se2d._root;
+		if (parentMcFound) {
+			parentMc.addChild(o);
+		}
+		
+		
+		if (img.aPoint) {
+			o.x = img.aPoint[0];
+			o.y = img.aPoint[1];
+		}
+		
+		// Это пока не работает, но пусть будет. Придётся выгребаить за счёт scale
+		if (img.aSz) {
+			o.w = img.aSz[0];
+			o.h = img.aSz[1];
+		}
+		
+		// это работает
+		if (img.scale) {
+			o.scaleX = img.scale[0];	 
+			o.scaleY = img.scale[1];	 
+		}
+		
+	}
+	o.__addFrame(img, img.nKeyframe);
+	
 	se2d.__images_count--;
 	SE2D.onLoadRastrResource(img.id);
 	//console.log(se2d.__images_count);
 	if (se2d.__images_count == 0) {
-		se2d.orderImagesByDepth();
+		se2d.orderImagesByDepth(); // TODO 2025 там с _level ничего не нужно?
 		se2d.onLoadImages();
 	}
 }
