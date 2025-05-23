@@ -670,13 +670,46 @@ Sprite.prototype.__addFrame = function(img, nKeyframe) {
 */
 Sprite.prototype.__changeFrame = function() {
 	var o = this, img, k;
-	o.currentFrame++;
+	if (o.__timelineState != "stop") {
+		o.currentFrame++;
+	}
 	if (o.currentFrame >= o.totalFrames) {
-		o.currentFrame = 1;
+		o.currentFrame = 0;
 	}
 	k = o.__keyframes[o.currentFrame];
 	(k || 0 === k) ? (img = o.frames[k][1]) : 0;
 	img ? (o.img = img) : 0;
+}
+
+Sprite.prototype.stop = function() {
+	this.__timelineState = "stop";
+}
+
+Sprite.prototype.play = function() {
+	this.__timelineState = "";
+}
+Sprite.prototype.__setKeyframeFromCurrentFrame = function(n) {
+	var i, z, o = this, maxKfLessN = 0;
+	if (o.__keyframes[n]) {
+		o.currentFrame = n;
+		return;
+	}
+	for (i in o.__keyframes) {
+		if (maxKfLessN < i && i < n) {
+			maxKfLessN = i;
+		}
+	}
+	o.currentFrame = maxKfLessN;
+}
+
+Sprite.prototype.gotoAndStop = function(n) {
+	this.stop();
+	this.__setKeyframeFromCurrentFrame(n);
+	this.__changeFrame();
+}
+Sprite.prototype.gotoAndPlay = function(n) {
+	this.__setKeyframeFromCurrentFrame(n);
+	this.play();
 }
 //=================TextFormat============================================
 /**

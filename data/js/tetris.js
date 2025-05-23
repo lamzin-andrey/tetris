@@ -24,7 +24,7 @@ function Tetris() {
 			[24, "data/images/anim0/02.png"],
 			[48, "data/images/anim0/02.png"]
 		], 
-		   0/*lvl*/, [10, 10]/*[xy]*/, [100, 200]/*wh*/, [0.5, 0.7]/*scale*/, 'parentClipId'], "first_anim"
+		   0/*lvl*/, [60, 50]/*[xy]*/, [100, 200]/*wh*/, [0.5, 0.7]/*scale*/, 'parentClipId'], "first_anim"
 	]);
 	//SE2D.canvas.onmousemove = this.onMouseMove;
 	SE2D.onEnterFrame = this.onEnterFrame;
@@ -41,8 +41,8 @@ Tetris.prototype.onInit = function() {
 		
 		// first anim
 		this.app.first_anim = SE2D._root.first_anim;
-		this.app.first_anim.visible = 0;
-		this.app.first_anim.go(50, 50);
+		this.app.first_anim.visible = 1;
+		//this.app.first_anim.go(50, 50);
 		// /first anim
 		
 		this.app.addConrtolsArea();
@@ -112,6 +112,15 @@ Tetris.prototype.moveDown = function() {
 		delete this.figure;      //на всякий случай
 		this.checkHRow();
 		this.figure = this.getRandomFigure();
+		
+		// Это просто тест goto* методов.
+		if (!window.dbgGSP) {
+			this.first_anim.gotoAndStop(1);
+			window.dbgGSP = 1;
+		} else {
+			this.first_anim.gotoAndStop(25); 
+			window.dbgGSP = 0;
+		}
 	}
 }
 /**
